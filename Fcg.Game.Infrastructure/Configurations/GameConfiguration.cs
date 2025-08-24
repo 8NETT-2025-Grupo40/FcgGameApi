@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Fcg.Game.Infrastructure.Configurationsp;
+namespace Fcg.Game.Infrastructure.Configurations;
 
 public class GameConfiguration : IEntityTypeConfiguration<GameModel>
 {

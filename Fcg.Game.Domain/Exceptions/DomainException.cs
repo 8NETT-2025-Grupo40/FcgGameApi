@@ -1,6 +1,6 @@
 ﻿namespace Fcg.Game.Domain.Exceptions
 {
-	internal class DomainException : Exception
+	public class DomainException : Exception
 	{
 		public DomainException()
 		{

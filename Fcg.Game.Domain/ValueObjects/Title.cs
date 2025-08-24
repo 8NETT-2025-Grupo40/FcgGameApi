@@ -6,6 +6,7 @@ public record Title
 {
 	const int MINIMUM_LENGTH = 10;
 	const int MAXIMUM_LENGTH = 255;
+
 	public string Value { get; private set; }
 
 	protected Title() => Value = string.Empty;
