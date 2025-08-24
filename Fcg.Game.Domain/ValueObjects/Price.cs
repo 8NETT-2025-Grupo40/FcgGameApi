@@ -1,11 +1,13 @@
-﻿using Fcg.GameDomain.Exceptions;
+﻿using Fcg.Game.Domain.Exceptions;
 using System.Globalization;
 
-namespace Fcg.GameDomain.ValueObjects;
+namespace Fcg.Game.Domain.ValueObjects;
 
 public record Price
 {
 	public decimal Value { get; }
+
+	protected Price() => Value = 0.0m;
 
 	public Price(decimal value)
 	{

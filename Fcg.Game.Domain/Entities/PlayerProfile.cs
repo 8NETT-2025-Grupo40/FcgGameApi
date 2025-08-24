@@ -1,7 +1,7 @@
-﻿using Fcg.GameDomain.Base;
-using Fcg.GameDomain.ValueObjects;
+﻿using Fcg.Game.Domain.Base;
+using Fcg.Game.Domain.ValueObjects;
 
-namespace Fcg.GameDomain.Entities;
+namespace Fcg.Game.Domain.Entities;
 
 public class PlayerProfile : EntityBase
 {
@@ -19,7 +19,7 @@ public class PlayerProfile : EntityBase
 	private readonly List<PlayerProfileGame> _games = [];
 	public IReadOnlyCollection<PlayerProfileGame> Games => _games;
 
-	public void AddGame(Game game)
+	public void AddGame(GameModel game)
 	{
 		if (_games.Any(g => g.GameId == game.Id))
 		{

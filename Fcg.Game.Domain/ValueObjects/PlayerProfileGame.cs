@@ -1,6 +1,6 @@
-﻿using Fcg.GameDomain.Entities;
+﻿using Fcg.Game.Domain.Entities;
 
-namespace Fcg.GameDomain.ValueObjects;
+namespace Fcg.Game.Domain.ValueObjects;
 
 public class PlayerProfileGame
 {
@@ -17,7 +17,7 @@ public class PlayerProfileGame
 	public PlayerProfile PlayerProfile { get; private set; } = null!;
 
 	public Guid GameId { get; private set; }
-	public Game Game { get; private set; } = null!;
+	public GameModel Game { get; private set; } = null!;
 
 	public DateTime AcquiredAt { get; private set; }
 }
