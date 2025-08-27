@@ -7,6 +7,7 @@ using Fcg.Game.Domain.ValueObjects;
 
 namespace Fcg.Game.Application.Services;
 
+//TODO: Create unit tests for service.
 public class GameService(IGameRepository gameRepository) : IGameService
 {
 	public async ValueTask<OperationResult<string>> CreateGame(CreateGameRequest createGameRequest)

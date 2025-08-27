@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fcg.Game.Api.Endpoints
 {
-	public static class GameEndpoints
+	//TODO: Create unit tests for endpoints.
+	public static class GamesEndpoints
 	{
 		public static void MapGameEndpoints(this WebApplication webApplication)
 		{
