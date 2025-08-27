@@ -52,7 +52,7 @@ jobs:
           with:
             name: .NET Tests Report
             path: "**/*.trx"
-            reporter: dotnet-rtx
+            reporter: dotnet-trx
             fail-on-error: true
 
 
