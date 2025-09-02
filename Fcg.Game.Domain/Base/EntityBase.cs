@@ -1,4 +1,4 @@
-﻿namespace Fcg.GameDomain.Base;
+﻿namespace Fcg.Game.Domain.Base;
 
 public abstract class EntityBase
 {

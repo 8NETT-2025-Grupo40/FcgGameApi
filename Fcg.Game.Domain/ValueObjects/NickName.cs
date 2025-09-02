@@ -1,9 +1,12 @@
-﻿using Fcg.GameDomain.Exceptions;
+﻿using Fcg.Game.Domain.Exceptions;
 
-namespace Fcg.GameDomain.ValueObjects;
+namespace Fcg.Game.Domain.ValueObjects;
 
 public record Nickname
 {
+	const int MINIMUM_LENGTH = 3;
+	const int MAXIMUM_LENGTH = 20;
+
 	public string Value { get; } = null!;
 	protected Nickname() { }
 
@@ -14,7 +17,7 @@ public record Nickname
 			throw new DomainException("Nickname is required.");
 		}
 
-		if (value.Length is < 3 or > 20)
+		if (value.Length is < MINIMUM_LENGTH or > MAXIMUM_LENGTH)
 		{
 			throw new DomainException("Nickname must be between 3 and 20 characters long.");
 		}

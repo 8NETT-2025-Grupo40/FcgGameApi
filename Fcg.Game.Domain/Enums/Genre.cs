@@ -1,4 +1,4 @@
-﻿namespace Fcg.GameDomain.Enums
+﻿namespace Fcg.Game.Domain.Enums
 {
 	public enum Genre
 	{
