@@ -11,6 +11,7 @@ namespace Fcg.Game.Api.Setup
 		public static void RegisterServices(this WebApplicationBuilder webApplicationBuilder)
 		{
 			webApplicationBuilder.Services.AddTransient<IGameService, GameService>();
+			webApplicationBuilder.Services.AddTransient<IElasticService, ElasticService>();
 			webApplicationBuilder.Services.AddTransient<IGameRepository, GameRepository>();
 			webApplicationBuilder.Services.AddDbContext<DatabaseGameContext>();
 		}

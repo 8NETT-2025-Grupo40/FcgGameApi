@@ -8,7 +8,9 @@ using Fcg.Game.Domain.ValueObjects;
 namespace Fcg.Game.Application.Services;
 
 //TODO: Create unit tests for service.
-public class GameService(IGameRepository gameRepository) : IGameService
+public class GameService(
+	IGameRepository gameRepository,
+	IElasticService elasticService) : IGameService
 {
 	public async ValueTask<OperationResult<string>> CreateGame(CreateGameRequest createGameRequest)
 	{
@@ -24,6 +26,8 @@ public class GameService(IGameRepository gameRepository) : IGameService
 			};
 
 			await gameRepository.Insert(game);
+
+			await elasticService.CreateGame();
 
 			return OperationResult<string>.CreateSucessfulResponse("Game created successfully");
 		}
