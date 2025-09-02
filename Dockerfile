@@ -1,14 +1,4 @@
-# Stage 1
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-
-USER app
-WORKDIR /app
-
-ENV ASPNETCORE_URLS=http://+:5265
-
-EXPOSE 5265
-
-# Stage 2
+# Stage 1 - Build and publish
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 
@@ -31,12 +21,15 @@ RUN dotnet publish "Fcg.Game.Api.csproj" \
     /p:UseAppHost=false
 
 
-# Stage 3
-FROM base AS final
+# Stage 2 - Start api
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER app
 WORKDIR /app
 
-# Copia os artefatos publicados da fase de build
+ENV ASPNETCORE_URLS=http://+:5265
+
+EXPOSE 5265
+
 COPY --from=build /app/publish .
 
-# Ponto de entrada da aplicação
 ENTRYPOINT ["dotnet", "Fcg.Game.Api.dll"]
