@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Fcg.Game.Domain\Fcg.Game.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
+  </ItemGroup>
+
 </Project>

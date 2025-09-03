@@ -29,4 +29,5 @@ public record Description
 	public override string ToString() => Value;
 
 	public static implicit operator Description(string description) => new(description);
+	public static implicit operator string(Description description) => description.ToString();
 }

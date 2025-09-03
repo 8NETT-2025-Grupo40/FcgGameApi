@@ -1,4 +1,5 @@
-﻿using Fcg.Game.Application.Entities;
+﻿using Fcg.Game.Application.Elastic;
+using Fcg.Game.Application.Entities;
 using Fcg.Game.Application.Entities.Requests;
 using Fcg.Game.Application.Repositories;
 using Fcg.Game.Application.Services.Ports;
@@ -7,10 +8,9 @@ using Fcg.Game.Domain.ValueObjects;
 
 namespace Fcg.Game.Application.Services;
 
-//TODO: Create unit tests for service.
 public class GameService(
 	IGameRepository gameRepository,
-	IElasticService elasticService) : IGameService
+	IElasticService<ElasticGameModel> elasticService) : IGameService
 {
 	public async ValueTask<OperationResult<string>> CreateGame(CreateGameRequest createGameRequest)
 	{
@@ -20,14 +20,17 @@ public class GameService(
 			var description = new Description(createGameRequest.Description);
 			var price = new Price(createGameRequest.Price);
 
-			var game = new GameModel(title, description, createGameRequest.Genre, createGameRequest.ReleaseDate, price)
+			var gameModel = new GameModel(title, description, createGameRequest.Genre, createGameRequest.ReleaseDate, price)
 			{
 				DateCreated = DateTime.Now,
 			};
 
-			await gameRepository.Insert(game);
+			await gameRepository.Insert(gameModel);
 
-			await elasticService.CreateGame();
+			var elasticGameModel =
+				new ElasticGameModel(gameModel.Title, gameModel.Description, (int)gameModel.Genre, gameModel.ReleaseDate, gameModel.Price);
+
+			await elasticService.CreateDocumentAsync(elasticGameModel);
 
 			return OperationResult<string>.CreateSucessfulResponse("Game created successfully");
 		}

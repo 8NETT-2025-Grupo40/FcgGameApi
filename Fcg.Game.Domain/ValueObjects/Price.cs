@@ -24,4 +24,5 @@ public record Price
 		Value.ToString("C2", CultureInfo.GetCultureInfo("en-US"));
 
 	public static implicit operator Price(decimal value) => new(value);
+	public static implicit operator string(Price price) => price.ToString();
 }
