@@ -6,6 +6,8 @@ namespace Fcg.Game.Application.Services.Ports;
 
 public interface IGameService
 {
+	ValueTask<OperationResult> AddGameToLibrary(GrantGameRequest grantGameRequest);
 	ValueTask<OperationResult<string>> CreateGame(CreateGameRequest createGameRequest);
 	ValueTask<OperationResult<IEnumerable<GameModel>>> ListAvailableGames();
+	ValueTask<OperationResult<List<GameModel>>> RetrieveGamesById(Guid guid);
 }

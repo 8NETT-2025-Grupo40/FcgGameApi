@@ -6,4 +6,5 @@ public interface IGameRepository
 {
 	ValueTask Insert(GameModel gameModel);
 	ValueTask<IEnumerable<GameModel>> SelectAll();
+	ValueTask<GameModel?> SelectById(Guid gameId);
 }

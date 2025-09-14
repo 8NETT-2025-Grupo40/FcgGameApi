@@ -14,4 +14,7 @@ public class GameRepository(DatabaseGameContext databaseGameContext) : IGameRepo
 
 	public async ValueTask<IEnumerable<GameModel>> SelectAll() => 
 		await databaseGameContext.Games.AsNoTracking().ToListAsync();
+
+	public async ValueTask<GameModel?> SelectById(Guid gameId) =>
+		await databaseGameContext.Games.AsNoTracking().FirstOrDefaultAsync(g => g.Id.Equals(gameId));
 }

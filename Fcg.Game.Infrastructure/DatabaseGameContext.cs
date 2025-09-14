@@ -6,6 +6,7 @@ namespace Fcg.Game.Infrastructure;
 public class DatabaseGameContext : DbContext
 {
 	public DbSet<GameModel> Games { get; set; }
+	public DbSet<PurchasedGameModel> PurchasedGames { get; set; }
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{

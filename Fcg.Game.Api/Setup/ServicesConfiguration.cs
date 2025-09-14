@@ -15,6 +15,7 @@ namespace Fcg.Game.Api.Setup
 		{
 			webApplicationBuilder.Services.AddTransient<IGameService, GameService>();
 			webApplicationBuilder.Services.AddTransient<IGameRepository, GameRepository>();
+			webApplicationBuilder.Services.AddTransient<IPurchasedGameRepository, PurchasedGameRepository>();
 			webApplicationBuilder.Services.AddDbContext<DatabaseGameContext>();
 			webApplicationBuilder.ConfigureElasticSearch();
 		}

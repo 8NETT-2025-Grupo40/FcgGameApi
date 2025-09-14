@@ -10,6 +10,7 @@ namespace Fcg.Game.Application.Services;
 
 public class GameService(
 	IGameRepository gameRepository,
+	IPurchasedGameRepository purchasedGameRepository,
 	IElasticService<ElasticGameModel> elasticService) : IGameService
 {
 	public async ValueTask<OperationResult<string>> CreateGame(CreateGameRequest createGameRequest)
@@ -32,7 +33,7 @@ public class GameService(
 
 			await elasticService.CreateDocumentAsync(elasticGameModel);
 
-			return OperationResult<string>.CreateSucessfulResponse("Game created successfully");
+			return OperationResult<string>.CreateSuccessfulResponse("Game created successfully");
 		}
 		catch (Exception exception)
 		{
@@ -51,11 +52,66 @@ public class GameService(
 				return OperationResult<IEnumerable<GameModel>>.CreateErrorResponse("No games available");
 			}
 
-			return OperationResult<IEnumerable<GameModel>>.CreateSucessfulResponse(games);
+			return OperationResult<IEnumerable<GameModel>>.CreateSuccessfulResponse(games);
 		}
 		catch (Exception exception)
 		{
 			return OperationResult<IEnumerable<GameModel>>.CreateErrorResponse(exception.Message);
+		}
+	}
+
+	public async ValueTask<OperationResult> AddGameToLibrary(GrantGameRequest grantGameRequest)
+	{
+		try
+		{
+			var userId = grantGameRequest.UserId;
+			var purchases = grantGameRequest.PurchasedGames;
+
+			var purchasedGames = new List<PurchasedGameModel>(purchases.Count);
+
+			foreach (var purchased in grantGameRequest.PurchasedGames)
+			{
+				purchasedGames.Add(PurchasedGameModel.Create(userId, purchased.GameId));
+			}
+
+			await purchasedGameRepository.InsertMany(purchasedGames);
+
+			return OperationResult.CreateSuccessfulResponse();
+		}
+		catch (Exception exception)
+		{
+			return OperationResult<IEnumerable<PurchasedGameModel>>.CreateErrorResponse(exception.Message);
+		}
+	}
+
+	public async ValueTask<OperationResult<List<GameModel>>> RetrieveGamesById(Guid guid)
+	{
+		try
+		{
+			var purchasedGames = await purchasedGameRepository.SelectByUserId(guid);
+
+			if (purchasedGames is null || purchasedGames.Count is 0)
+			{
+				return OperationResult<List<GameModel>>.CreateErrorResponse("No games available");
+			}
+
+			var games = new List<GameModel>();
+
+			foreach (var purchasedGame in purchasedGames)
+			{
+				var dbGame = await gameRepository.SelectById(purchasedGame.GameIdentifier);
+
+				if (dbGame is not null)
+				{
+					games.Add(dbGame);
+				}
+			}
+
+			return OperationResult<List<GameModel>>.CreateSuccessfulResponse(games);
+		}
+		catch (Exception exception)
+		{
+			return OperationResult<List<GameModel>>.CreateErrorResponse(exception.Message);
 		}
 	}
 }
