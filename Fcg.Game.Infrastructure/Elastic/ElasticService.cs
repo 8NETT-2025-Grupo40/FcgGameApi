@@ -1,9 +1,12 @@
 ﻿using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.Nodes;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using Fcg.Game.Application.Elastic;
+using Fcg.Game.Application.Extensions;
 using Fcg.Game.Domain.Entities;
 using Fcg.Game.Domain.Enums;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
 namespace Fcg.Game.Infrastructure.Elastic
 {
@@ -50,10 +53,13 @@ namespace Fcg.Game.Infrastructure.Elastic
 		public async ValueTask<IReadOnlyCollection<ElasticGameModel>> GetSuggestionsAsync(Genre genre, HashSet<string> ownedGames, int pageSize)
 		{
 			var queries = new List<Query>();
+			
+			string gameIdPropertyName = ClassExtensions.GetPropertyName((ElasticGameModel c) => c.GameId);
+			string genrePropertyName = ClassExtensions.GetPropertyName((ElasticGameModel c) => c.Genre);
 
 			foreach (var item in ownedGames)
 			{
-				queries.Add(new MatchQuery() { Field = "gameId", Query = item });
+				queries.Add(new MatchQuery() { Field = gameIdPropertyName, Query = item });
 			}
 
 			var searchResponse = await _client.SearchAsync<ElasticGameModel>(s => s
@@ -61,7 +67,7 @@ namespace Fcg.Game.Infrastructure.Elastic
 					.Bool(b => b
 						.Should(new List<Query>
 						{
-							new MatchQuery() { Field = "genre",Query = (int)genre }
+							new MatchQuery() { Field = genrePropertyName,Query = (int)genre }
 						})
 						.MustNot(queries)
 					)

@@ -147,10 +147,11 @@ public class GameService(
 			}
 
 			var suggestedGames = new List<ElasticGameModel>();
+			var suggestionsPerGenre = 2;
 
 			foreach (var genre in genreDictionary)
 			{
-				suggestedGames.AddRange(await elasticService.GetSuggestionsAsync(genre.Key, genre.Value, 10));
+				suggestedGames.AddRange(await elasticService.GetSuggestionsAsync(genre.Key, genre.Value, suggestionsPerGenre));
 			}
 
 			return OperationResult<List<ElasticGameModel>>.CreateSuccessfulResponse(suggestedGames);
