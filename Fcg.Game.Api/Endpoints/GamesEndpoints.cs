@@ -17,6 +17,7 @@ namespace Fcg.Game.Api.Endpoints
 			webApplication.MapGet("/games", ListGames).WithName("Get list of available games");
 			webApplication.MapPost("/library", GrantGameToUser).WithName("Confirm a game purchase");
 			webApplication.MapGet("/library", RetriveLibraryByUserId).WithName("Retrieve user's library");
+			webApplication.MapGet("/suggestions", SuggestGames).WithName("Suggest games based on user's favorite genres");
 		}
 
 		private static string Sample() => "Healthy: This is the game api!";
@@ -32,7 +33,7 @@ namespace Fcg.Game.Api.Endpoints
 				return Results.BadRequest(operationResult.Message);
 			}
 
-			return Results.Ok(operationResult.Value);
+			return Results.Ok(operationResult.Value.ToString());
 		}
 
 		private static async ValueTask<IResult> ListGames(
@@ -67,6 +68,20 @@ namespace Fcg.Game.Api.Endpoints
 			[FromQuery] Guid userId)
 		{
 			var operationResult = await gameService.RetrieveGamesById(userId);
+
+			if (operationResult.IsSuccessful is false)
+			{
+				return Results.BadRequest(operationResult.Message);
+			}
+
+			return Results.Ok(operationResult.Value);
+		}
+
+		private static async ValueTask<IResult> SuggestGames(
+			IGameService gameService,
+			[FromQuery] Guid userId)
+		{
+			var operationResult = await gameService.GetSuggestions(userId);
 
 			if (operationResult.IsSuccessful is false)
 			{

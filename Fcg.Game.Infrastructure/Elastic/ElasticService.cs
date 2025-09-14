@@ -1,25 +1,28 @@
 ﻿using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.QueryDsl;
 using Fcg.Game.Application.Elastic;
+using Fcg.Game.Domain.Entities;
+using Fcg.Game.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace Fcg.Game.Infrastructure.Elastic
 {
-	public class ElasticService<T> : IElasticService<T>
+	public class ElasticService : IElasticService
 	{
 		private readonly string _indexName;
 		private readonly ElasticsearchClient _client;
-		private readonly ILogger<ElasticService<T>> _logger;
+		private readonly ILogger<ElasticService> _logger;
 
-		public ElasticService(IElasticSettings elasticSettings, ILogger<ElasticService<T>> logger)
+		public ElasticService(IElasticSettings elasticSettings, ILogger<ElasticService> logger)
 		{
 			_logger = logger;
 
-			_indexName = typeof(T).Name.ToLower();
+			_indexName = typeof(ElasticGameModel).Name.ToLower();
 			var settings = new ElasticsearchClientSettings(new Uri(elasticSettings.Address));
 			_client = new ElasticsearchClient(settings);
 		}
 
-		public async ValueTask CreateDocumentAsync(T document)
+		public async ValueTask CreateDocumentAsync(ElasticGameModel document)
 		{
 			await CreateIndex();
 
@@ -37,14 +40,35 @@ namespace Fcg.Game.Infrastructure.Elastic
 
 				return;
 			}
+
+			_logger.LogInformation("Document created");
 		}
 
-		public async ValueTask<IReadOnlyCollection<T>> GetAllAsync() =>
-			(await _client.SearchAsync<T>(s => s.Indices(_indexName))).Documents;
+		public async ValueTask<IReadOnlyCollection<ElasticGameModel>> GetAllAsync() =>
+			(await _client.SearchAsync<ElasticGameModel>(s => s.Indices(_indexName))).Documents;
 
-		public ValueTask<IReadOnlyCollection<T>> GetAsync(int page, int pageSize)
+		public async ValueTask<IReadOnlyCollection<ElasticGameModel>> GetSuggestionsAsync(Genre genre, HashSet<string> ownedGames, int pageSize)
 		{
-			throw new NotImplementedException();
+			var queries = new List<Query>();
+
+			foreach (var item in ownedGames)
+			{
+				queries.Add(new MatchQuery() { Field = "gameId", Query = item });
+			}
+
+			var searchResponse = await _client.SearchAsync<ElasticGameModel>(s => s
+				.Query(q => q
+					.Bool(b => b
+						.Should(new List<Query>
+						{
+							new MatchQuery() { Field = "genre",Query = (int)genre }
+						})
+						.MustNot(queries)
+					)
+				)
+			);
+
+			return searchResponse.Documents;
 		}
 
 		private async ValueTask CreateIndex()
@@ -53,7 +77,6 @@ namespace Fcg.Game.Infrastructure.Elastic
 
 			if (response.ApiCallDetails.HttpStatusCode is 400)
 			{
-				_logger.LogInformation("Index already exists");
 				return;
 			}
 

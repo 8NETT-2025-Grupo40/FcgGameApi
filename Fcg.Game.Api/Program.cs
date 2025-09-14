@@ -7,7 +7,6 @@ builder.ConfigureSwagger();
 builder.RegisterServices();
 
 var app = builder.Build();
-app.AddGames();
 app.AddSwaggerUi();
 app.MapGameEndpoints();
 app.Run();

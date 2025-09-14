@@ -1,9 +1,12 @@
-﻿namespace Fcg.Game.Application.Elastic
+﻿using Fcg.Game.Domain.Entities;
+using Fcg.Game.Domain.Enums;
+
+namespace Fcg.Game.Application.Elastic
 {
-	public interface IElasticService<T>
+	public interface IElasticService
 	{
-		ValueTask<IReadOnlyCollection<T>> GetAsync(int page, int pageSize);
-		ValueTask<IReadOnlyCollection<T>> GetAllAsync();
-		ValueTask CreateDocumentAsync(T document);
+		ValueTask<IReadOnlyCollection<ElasticGameModel>> GetAllAsync();
+		ValueTask CreateDocumentAsync(ElasticGameModel document);
+		ValueTask<IReadOnlyCollection<ElasticGameModel>> GetSuggestionsAsync(Genre genre, HashSet<string> ownedGames, int pageSize);
 	}
 }

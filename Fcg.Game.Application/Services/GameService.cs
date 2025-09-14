@@ -4,6 +4,7 @@ using Fcg.Game.Application.Entities.Requests;
 using Fcg.Game.Application.Repositories;
 using Fcg.Game.Application.Services.Ports;
 using Fcg.Game.Domain.Entities;
+using Fcg.Game.Domain.Enums;
 using Fcg.Game.Domain.ValueObjects;
 
 namespace Fcg.Game.Application.Services;
@@ -11,7 +12,7 @@ namespace Fcg.Game.Application.Services;
 public class GameService(
 	IGameRepository gameRepository,
 	IPurchasedGameRepository purchasedGameRepository,
-	IElasticService<ElasticGameModel> elasticService) : IGameService
+	IElasticService elasticService) : IGameService
 {
 	public async ValueTask<OperationResult<string>> CreateGame(CreateGameRequest createGameRequest)
 	{
@@ -26,14 +27,14 @@ public class GameService(
 				DateCreated = DateTime.Now,
 			};
 
-			await gameRepository.Insert(gameModel);
+			var gameId = await gameRepository.Insert(gameModel);
 
 			var elasticGameModel =
-				new ElasticGameModel(gameModel.Title, gameModel.Description, (int)gameModel.Genre, gameModel.ReleaseDate, gameModel.Price);
+				new ElasticGameModel(gameId, gameModel.Title, gameModel.Description, (int)gameModel.Genre, gameModel.ReleaseDate, gameModel.Price);
 
 			await elasticService.CreateDocumentAsync(elasticGameModel);
 
-			return OperationResult<string>.CreateSuccessfulResponse("Game created successfully");
+			return OperationResult<string>.CreateSuccessfulResponse(gameId);
 		}
 		catch (Exception exception)
 		{
@@ -112,6 +113,51 @@ public class GameService(
 		catch (Exception exception)
 		{
 			return OperationResult<List<GameModel>>.CreateErrorResponse(exception.Message);
+		}
+	}
+
+	public async ValueTask<OperationResult<List<ElasticGameModel>>> GetSuggestions(Guid guid)
+	{
+		try
+		{
+			var purchasedGames = await purchasedGameRepository.SelectByUserId(guid);
+
+			if (purchasedGames is null || purchasedGames.Count is 0)
+			{
+				return OperationResult<List<ElasticGameModel>>.CreateErrorResponse("No games have been bought yet, nothing to suggest");
+			}
+
+			var games = new List<GameModel>();
+
+			var genreDictionary = new Dictionary<Genre, HashSet<string>>();
+
+			foreach (var purchasedGame in purchasedGames)
+			{
+				var genre = await gameRepository.SelectGenreById(purchasedGame.GameIdentifier);
+
+				if (genre is not Genre.Unknown)
+				{
+					var gameIdentifierStr = purchasedGame.GameIdentifier.ToString();
+
+					if (!genreDictionary.TryAdd(genre, [gameIdentifierStr]))
+					{
+						genreDictionary[genre].Add(gameIdentifierStr);
+					}
+				}
+			}
+
+			var suggestedGames = new List<ElasticGameModel>();
+
+			foreach (var genre in genreDictionary)
+			{
+				suggestedGames.AddRange(await elasticService.GetSuggestionsAsync(genre.Key, genre.Value, 10));
+			}
+
+			return OperationResult<List<ElasticGameModel>>.CreateSuccessfulResponse(suggestedGames);
+		}
+		catch (Exception exception)
+		{
+			return OperationResult<List<ElasticGameModel>>.CreateErrorResponse(exception.Message);
 		}
 	}
 }

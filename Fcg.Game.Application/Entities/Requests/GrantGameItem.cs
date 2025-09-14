@@ -3,6 +3,4 @@
 public class GrantGameItem
 {
 	public string GameId { get; set; } = "";
-	//public decimal Price { get; set; }
-	//TODO Confirmar
 }

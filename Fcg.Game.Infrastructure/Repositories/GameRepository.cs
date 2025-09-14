@@ -1,15 +1,19 @@
 ﻿using Fcg.Game.Application.Repositories;
 using Fcg.Game.Domain.Entities;
+using Fcg.Game.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fcg.Game.Infrastructure.Repositories;
 
 public class GameRepository(DatabaseGameContext databaseGameContext) : IGameRepository
 {
-	public async ValueTask Insert(GameModel gameModel)
+	public async ValueTask<string> Insert(GameModel gameModel)
 	{
-		databaseGameContext.Games.Add(gameModel);
+		var addedGame = databaseGameContext.Games.Add(gameModel);
+
 		await databaseGameContext.SaveChangesAsync();
+
+		return addedGame.Entity.Id.ToString();
 	}
 
 	public async ValueTask<IEnumerable<GameModel>> SelectAll() => 
@@ -17,4 +21,7 @@ public class GameRepository(DatabaseGameContext databaseGameContext) : IGameRepo
 
 	public async ValueTask<GameModel?> SelectById(Guid gameId) =>
 		await databaseGameContext.Games.AsNoTracking().FirstOrDefaultAsync(g => g.Id.Equals(gameId));
+
+	public async ValueTask<Genre> SelectGenreById(Guid gameId) =>
+		await databaseGameContext.Games.Where(g => g.Id.Equals(gameId)).Select(g => g.Genre).FirstOrDefaultAsync();
 }

@@ -12,11 +12,6 @@ public class PurchasedGameRepository(DatabaseGameContext databaseGameContext) : 
 		await databaseGameContext.SaveChangesAsync();
 	}
 
-	public async ValueTask<List<PurchasedGameModel>> SelectByUserId(Guid guid)
-	{
-		var a = await databaseGameContext.PurchasedGames.Where(p => p.UserIdentifier.Equals(guid)).ToListAsync();
-		var c = await databaseGameContext.PurchasedGames.Where(p => p.UserIdentifier == guid).ToListAsync();
-		var b = await databaseGameContext.PurchasedGames.Select(p => p.UserIdentifier.Equals(guid)).ToListAsync();
-		return a;
-	}
+	public async ValueTask<List<PurchasedGameModel>> SelectByUserId(Guid guid) =>
+		await databaseGameContext.PurchasedGames.Where(p => p.UserIdentifier.Equals(guid)).ToListAsync();
 }

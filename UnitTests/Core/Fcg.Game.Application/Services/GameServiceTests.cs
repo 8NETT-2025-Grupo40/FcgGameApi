@@ -14,14 +14,16 @@ namespace UnitTests.Core.Fcg.Game.Application.Services
 		private GameService _gameService;
 
 		private IGameRepository _gameRepository;
-		private IElasticService<ElasticGameModel> _elasticService;
+		private IPurchasedGameRepository _purchasedGamesRepository;
+		private IElasticService _elasticService;
 
 		public GameServiceTests()
 		{
 			_gameRepository = Substitute.For<IGameRepository>();
-			_elasticService = Substitute.For<IElasticService<ElasticGameModel>>();
+			_elasticService = Substitute.For<IElasticService>();
+			_purchasedGamesRepository = Substitute.For<IPurchasedGameRepository>();
 
-			_gameService = new GameService(_gameRepository, _elasticService);
+			_gameService = new GameService(_gameRepository, _purchasedGamesRepository, _elasticService);
 		}
 
 		[Fact]
