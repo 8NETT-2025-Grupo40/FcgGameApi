@@ -3,6 +3,7 @@ using Fcg.Game.Application.Entities.Requests;
 using Fcg.Game.Application.Repositories;
 using Fcg.Game.Application.Services;
 using Fcg.Game.Domain.Entities;
+using Fcg.Game.Domain.Entities.Elastic;
 using Fcg.Game.Domain.Enums;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -16,14 +17,16 @@ namespace UnitTests.Core.Fcg.Game.Application.Services
 		private IGameRepository _gameRepository;
 		private IPurchasedGameRepository _purchasedGamesRepository;
 		private IElasticGameService _elasticService;
+		private IElasticPurchasedGameService _elasticPurchasedGameService;
 
 		public GameServiceTests()
 		{
 			_gameRepository = Substitute.For<IGameRepository>();
 			_elasticService = Substitute.For<IElasticGameService>();
 			_purchasedGamesRepository = Substitute.For<IPurchasedGameRepository>();
+			_elasticPurchasedGameService = Substitute.For<IElasticPurchasedGameService>();
 
-			_gameService = new GameService(_gameRepository, _purchasedGamesRepository, _elasticService);
+			_gameService = new GameService(_gameRepository, _purchasedGamesRepository, _elasticService, _elasticPurchasedGameService);
 		}
 
 		[Fact]

@@ -1,4 +1,4 @@
-﻿using Fcg.Game.Domain.Entities;
+﻿using Fcg.Game.Domain.Entities.Elastic;
 using Fcg.Game.Domain.Enums;
 
 namespace Fcg.Game.Application.Elastic

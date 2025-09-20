@@ -7,13 +7,14 @@ namespace Fcg.Game.Api.Endpoints
 	public static class GamesEndpoints
 	{
 		public static void MapGameEndpoints(this WebApplication webApplication)
-		{	
+		{
 			webApplication.MapGet("/health", Health);
 			webApplication.MapPost("/games", CreateGame).WithName("Create a new game");
 			webApplication.MapGet("/games", ListGames).WithName("Get list of available games");
 			webApplication.MapPost("games/library", GrantGameToUser).WithName("Confirm a game purchase");
 			webApplication.MapGet("games/library", RetriveLibraryByUserId).WithName("Retrieve user's library");
 			webApplication.MapGet("games/suggestions", SuggestGames).WithName("Suggest games based on user's favorite genres");
+			webApplication.MapGet("games/popular", RetrievePopularGames).WithName("Find out the most popular games on the store");
 		}
 
 		private static string Health() => "Healthy: This is the game api!";
@@ -78,6 +79,19 @@ namespace Fcg.Game.Api.Endpoints
 			[FromQuery] Guid userId)
 		{
 			var operationResult = await gameService.GetSuggestions(userId);
+
+			if (operationResult.IsSuccessful is false)
+			{
+				return Results.BadRequest(operationResult.Message);
+			}
+
+			return Results.Ok(operationResult.Value);
+		}
+
+		private static async ValueTask<IResult> RetrievePopularGames(
+			IGameService gameService)
+		{
+			var operationResult = await gameService.Popular();
 
 			if (operationResult.IsSuccessful is false)
 			{

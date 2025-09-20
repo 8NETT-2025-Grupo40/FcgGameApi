@@ -42,6 +42,28 @@ namespace Fcg.Game.Infrastructure.Elastic
 			_logger.LogInformation("Document created");
 		}
 
+		public async ValueTask CreateManyDocumentsAsync(IReadOnlyCollection<T> documents)
+		{
+			await CreateIndex();
+
+			var response = await Client.BulkAsync(b => b.Index(_indexName).IndexMany(documents));
+
+			if (response.IsValidResponse is false)
+			{
+				if (response.TryGetOriginalException(out var ex) && ex is not null)
+				{
+					_logger.LogError("Could not create document\n{ExceptionMessage}", ex.Message);
+					return;
+				}
+
+				_logger.LogError("Could not create document");
+
+				return;
+			}
+
+			_logger.LogInformation("Document created");
+		}
+
 		public async ValueTask<IReadOnlyCollection<T>> GetAllAsync() =>
 			(await Client.SearchAsync<T>(s => s.Indices(_indexName))).Documents;
 

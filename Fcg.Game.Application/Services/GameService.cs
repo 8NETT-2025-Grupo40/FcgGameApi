@@ -1,18 +1,22 @@
-﻿using Fcg.Game.Application.Elastic;
+﻿using Elastic.Clients.Elasticsearch.Cluster;
+using Fcg.Game.Application.Elastic;
 using Fcg.Game.Application.Entities;
 using Fcg.Game.Application.Entities.Requests;
 using Fcg.Game.Application.Repositories;
 using Fcg.Game.Application.Services.Ports;
 using Fcg.Game.Domain.Entities;
+using Fcg.Game.Domain.Entities.Elastic;
 using Fcg.Game.Domain.Enums;
 using Fcg.Game.Domain.ValueObjects;
+using System.Net;
 
 namespace Fcg.Game.Application.Services;
 
 public class GameService(
 	IGameRepository gameRepository,
 	IPurchasedGameRepository purchasedGameRepository,
-	IElasticGameService elasticService) : IGameService
+	IElasticGameService elasticService,
+	IElasticPurchasedGameService elasticPurchasedGameService) : IGameService
 {
 	public async ValueTask<OperationResult<string>> CreateGame(CreateGameRequest createGameRequest)
 	{
@@ -69,13 +73,17 @@ public class GameService(
 			var purchases = grantGameRequest.PurchasedGames;
 
 			var purchasedGames = new List<PurchasedGameModel>(purchases.Count);
+			var elasticPurchasedGames = new List<ElasticPurchasedGameModel>(purchases.Count);
 
 			foreach (var purchased in grantGameRequest.PurchasedGames)
 			{
 				purchasedGames.Add(PurchasedGameModel.Create(userId, purchased.GameId));
+				elasticPurchasedGames.Add(new ElasticPurchasedGameModel { GameIdentifier = purchased.GameId, UserIdentifier = userId });
 			}
 
 			await purchasedGameRepository.InsertMany(purchasedGames);
+
+			await elasticPurchasedGameService.CreateManyDocumentsAsync(elasticPurchasedGames);
 
 			return OperationResult.CreateSuccessfulResponse();
 		}
@@ -160,5 +168,31 @@ public class GameService(
 		{
 			return OperationResult<List<ElasticGameModel>>.CreateErrorResponse(exception.Message);
 		}
+	}
+
+	public async ValueTask<OperationResult<IReadOnlyCollection<PopularGame>>> Popular()
+	{
+		var elasticPopularGames = await elasticPurchasedGameService.SearchPopularGames();
+
+		var popularGames = new List<PopularGame>();
+
+		foreach (var elasticPopularGame in elasticPopularGames)
+		{
+			var title = await gameRepository.SelectNameById(elasticPopularGame.GameId);
+
+			if (title is null || string.IsNullOrWhiteSpace(title))
+			{
+				continue;
+			}
+
+			popularGames.Add(new PopularGame(elasticPopularGame.GameId, title, elasticPopularGame.PurchaseCount));
+		}
+
+		if (popularGames.Count <= 0)
+		{
+			return OperationResult<IReadOnlyCollection<PopularGame>>.CreateErrorResponse("No games bought to aggregate popular ones");
+		}
+
+		return OperationResult<IReadOnlyCollection<PopularGame>>.CreateSuccessfulResponse(popularGames);
 	}
 }

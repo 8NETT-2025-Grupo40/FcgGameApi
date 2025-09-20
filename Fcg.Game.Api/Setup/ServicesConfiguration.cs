@@ -29,6 +29,7 @@ namespace Fcg.Game.Api.Setup
 
 			webApplicationBuilder.Services.AddSingleton(typeof(IElasticService<>), typeof(ElasticService<>));
 			webApplicationBuilder.Services.AddSingleton<IElasticGameService, ElasticGameService>();
+			webApplicationBuilder.Services.AddSingleton<IElasticPurchasedGameService, ElasticPurchasedGameService>();
 		}
 	}
 }

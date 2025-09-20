@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Fcg.Game.Domain.Entities
+namespace Fcg.Game.Domain.Entities.Elastic
 {
 	public class ElasticGameModel
 	{

@@ -4,5 +4,6 @@
 	{
 		ValueTask<IReadOnlyCollection<T>> GetAllAsync();
 		ValueTask CreateDocumentAsync(T document);
+		ValueTask CreateManyDocumentsAsync(IReadOnlyCollection<T> documents);
 	}
 }

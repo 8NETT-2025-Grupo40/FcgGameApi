@@ -1,7 +1,7 @@
 ﻿using Elastic.Clients.Elasticsearch.QueryDsl;
 using Fcg.Game.Application.Elastic;
 using Fcg.Game.Application.Extensions;
-using Fcg.Game.Domain.Entities;
+using Fcg.Game.Domain.Entities.Elastic;
 using Fcg.Game.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
