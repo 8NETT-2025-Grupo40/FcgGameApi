@@ -12,7 +12,7 @@ namespace Fcg.Game.Application.Services;
 public class GameService(
 	IGameRepository gameRepository,
 	IPurchasedGameRepository purchasedGameRepository,
-	IElasticService elasticService) : IGameService
+	IElasticGameService elasticService) : IGameService
 {
 	public async ValueTask<OperationResult<string>> CreateGame(CreateGameRequest createGameRequest)
 	{
