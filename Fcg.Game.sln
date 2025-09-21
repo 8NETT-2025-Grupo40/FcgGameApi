@@ -35,6 +35,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Git", "Git", "{BFB7DBC1-251E-439E-BE72-67B44E10685A}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		.github\ecs\ecs-game-task-definition.json = .github\ecs\ecs-game-task-definition.json
 		.github\workflows\fcg-game.yml = .github\workflows\fcg-game.yml
 	EndProjectSection
 EndProject

@@ -88,9 +88,9 @@ namespace UnitTests.Core.Fcg.Game.Application.Services
 		{
 			// Arrange
 			const string expectedResultMessage = "Success";
-			const string expectedValue = "Game created successfully";
 			const string sampleTitle = "sampleTitle";
 			const string sampleDescription = "sampleDescription";
+			const string expectedGameIdentifier = "E33B36C2-75DC-46DA-B89E-E31CBB81EB0B";
 			const decimal samplePrice = 1;
 			const Genre sampleGenre = Genre.Action;
 			var sampleReleaseDate = DateTime.Now;
@@ -104,15 +104,15 @@ namespace UnitTests.Core.Fcg.Game.Application.Services
 				Title = sampleTitle
 			};
 
+			_gameRepository.Insert(Arg.Any<GameModel>()).Returns(expectedGameIdentifier);
+
 			// Act
 			var result = await _gameService.CreateGame(createGameRequest);
 
-
 			// Assert
-
 			Assert.True(result.IsSuccessful);
 			Assert.Equal(expectedResultMessage, result.Message);
-			Assert.Equal(expectedValue, result.Value);
+			Assert.Equal(expectedGameIdentifier, "this is a tets");
 			await _gameRepository.Received(1).Insert(Arg.Is<GameModel>(x => 
 				x.Title.Value.Equals(sampleTitle, StringComparison.OrdinalIgnoreCase) && 
 				x.Description.Value.Equals(sampleDescription, StringComparison.OrdinalIgnoreCase) && 
