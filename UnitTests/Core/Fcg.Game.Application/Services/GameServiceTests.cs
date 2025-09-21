@@ -112,7 +112,7 @@ namespace UnitTests.Core.Fcg.Game.Application.Services
 			// Assert
 			Assert.True(result.IsSuccessful);
 			Assert.Equal(expectedResultMessage, result.Message);
-			Assert.Equal(expectedGameIdentifier, "this is a tets");
+			Assert.Equal(expectedGameIdentifier, result.Value);
 			await _gameRepository.Received(1).Insert(Arg.Is<GameModel>(x => 
 				x.Title.Value.Equals(sampleTitle, StringComparison.OrdinalIgnoreCase) && 
 				x.Description.Value.Equals(sampleDescription, StringComparison.OrdinalIgnoreCase) && 
@@ -125,7 +125,7 @@ namespace UnitTests.Core.Fcg.Game.Application.Services
 		}
 
 		[Fact]
-		public async Task OnCreateGame_WhenExcpetionIsThrownInsideMethod_ShouldReturnErrorWithCorrectMessage()
+		public async Task OnCreateGame_WhenExceptionIsThrownInsideMethod_ShouldReturnErrorWithCorrectMessage()
 		{
 			// Arrange
 			const string expectedResultMessage = "sampleExceptionMessage";
