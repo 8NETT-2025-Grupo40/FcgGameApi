@@ -1,0 +1,63 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "fcg-game-api",
+      "image": "478511033947.dkr.ecr.us-east-1.amazonaws.com/fcg-game-api:latest",
+      "cpu": 1024,
+      "memory": 2048,
+      "portMappings": [
+        {
+          "containerPort": 5265,
+          "hostPort": 5265,
+          "protocol": "tcp",
+          "name": "fcg-game-api-5265-tcp",
+          "appProtocol": "http"
+        }
+      ],
+      "essential": true,
+      "secrets": [
+        {
+          "name": "ConnectionStrings__DefaultConnection",
+          "valueFrom": "TODO: Create secret with connection string."
+        }
+      ],
+      "environment": [],
+      "environmentFiles": [],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "readonlyRootFilesystem": false,
+      "ulimits": [],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/TSK-FCG",
+          "awslogs-create-group": "true",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        },
+        "secretOptions": []
+      },
+      "systemControls": []
+    }
+  ],
+  "family": "TSK-FCG",
+  "executionRoleArn": "arn:aws:iam::478511033947:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "volumes": [],
+  "placementConstraints": [],
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "1024",
+  "memory": "2048",
+  "tags": [
+    {
+      "key": "entrega",
+      "value": "3"
+    }
+  ]
+}
