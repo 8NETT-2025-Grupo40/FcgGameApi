@@ -18,7 +18,7 @@
       "secrets": [
         {
           "name": "ConnectionStrings__DefaultConnection",
-          "valueFrom": "TODO: Create secret with connection string."
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:478511033947:secret:fcg-api-game-connection-string-BbpGA3"
         }
       ],
       "environment": [],
