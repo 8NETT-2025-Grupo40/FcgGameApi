@@ -12,9 +12,9 @@ namespace Fcg.Game.Api.Endpoints
 			webApplication.MapPost("/games", CreateGame).WithName("Create a new game");
 			webApplication.MapGet("/games", ListGames).WithName("Get list of available games");
 			webApplication.MapPost("games/library", GrantGameToUser).WithName("Confirm a game purchase");
-			webApplication.MapGet("games/library", RetriveLibraryByUserId).WithName("Retrieve user's library");
-			webApplication.MapGet("games/suggestions", SuggestGames).WithName("Suggest games based on user's favorite genres");
-			webApplication.MapGet("games/popular", RetrievePopularGames).WithName("Find out the most popular games on the store");
+			webApplication.MapGet("/games/library", RetriveLibraryByUserId).WithName("Retrieve user's library");
+			webApplication.MapGet("/games/suggestions", SuggestGames).WithName("Suggest games based on user's favorite genres");
+			webApplication.MapGet("/games/popular", RetrievePopularGames).WithName("Find out the most popular games on the store");
 		}
 
 		private static string Health() => "Healthy: This is the game api!";
