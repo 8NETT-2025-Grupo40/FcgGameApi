@@ -1,4 +1,5 @@
 ﻿using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
 using Fcg.Game.Application.Elastic;
 using Microsoft.Extensions.Logging;
 
@@ -14,7 +15,11 @@ namespace Fcg.Game.Infrastructure.Elastic
 		public ElasticService(IElasticSettings elasticSettings, ILoggerFactory loggerFactory)
 		{
 			_indexName = typeof(T).Name.ToLower();
-			var settings = new ElasticsearchClientSettings(new Uri(elasticSettings.Address));
+						
+			var nodePool = new CloudNodePool(elasticSettings.CloudId, new ApiKey(elasticSettings.Key));
+
+			var settings = new ElasticsearchClientSettings(nodePool);
+
 			Client = new ElasticsearchClient(settings);
 
 			_logger = loggerFactory.CreateLogger(nameof(T));

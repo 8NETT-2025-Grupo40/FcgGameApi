@@ -3,5 +3,7 @@
 	public interface IElasticSettings
 	{
 		public string Address { get; set; }
+		string CloudId { get; set; }
+		string Key { get; set; }
 	}
 }
