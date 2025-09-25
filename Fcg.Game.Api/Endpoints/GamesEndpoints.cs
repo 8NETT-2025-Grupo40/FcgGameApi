@@ -8,7 +8,6 @@ namespace Fcg.Game.Api.Endpoints
 	{
 		public static void MapGameEndpoints(this WebApplication webApplication)
 		{
-			webApplication.MapGet("/health", Health);
 			webApplication.MapPost("/games", CreateGame).WithName("Create a new game");
 			webApplication.MapGet("/games", ListGames).WithName("Get list of available games");
 			webApplication.MapPost("games/library", GrantGameToUser).WithName("Confirm a game purchase");
@@ -16,8 +15,6 @@ namespace Fcg.Game.Api.Endpoints
 			webApplication.MapGet("/games/suggestions", SuggestGames).WithName("Suggest games based on user's favorite genres");
 			webApplication.MapGet("/games/popular", RetrievePopularGames).WithName("Find out the most popular games on the store");
 		}
-
-		private static string Health() => "Healthy: This is the game api!";
 
 		private static async ValueTask<IResult> CreateGame(
 			IGameService gameService,

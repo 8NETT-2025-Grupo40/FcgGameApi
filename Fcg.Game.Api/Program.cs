@@ -8,8 +8,13 @@ builder.ConfigureSwagger();
 builder.RegisterServices();
 builder.ConfigureElasticSearch();
 builder.AddDbContextConfiguration();
+builder.ConfigureHealthChecks();
 
 var app = builder.Build();
+
 app.AddSwaggerUi();
+
 app.MapGameEndpoints();
+app.MapHealthCheckEndpoints();
+
 app.Run();
