@@ -8,10 +8,9 @@ public class DatabaseGameContext : DbContext
 	public DbSet<GameModel> Games { get; set; }
 	public DbSet<PurchasedGameModel> PurchasedGames { get; set; }
 
-	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	{
-		optionsBuilder.UseInMemoryDatabase("GameInMemoryDatabase");
-	}
+	public DatabaseGameContext() { }
+
+	public DatabaseGameContext(DbContextOptions<DatabaseGameContext> options) : base(options) { }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
