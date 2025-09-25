@@ -17,19 +17,6 @@ namespace Fcg.Game.Api.Setup
 			webApplicationBuilder.Services.AddTransient<IGameRepository, GameRepository>();
 			webApplicationBuilder.Services.AddTransient<IPurchasedGameRepository, PurchasedGameRepository>();
 			webApplicationBuilder.Services.AddDbContext<DatabaseGameContext>();
-			webApplicationBuilder.ConfigureElasticSearch();
-		}
-
-		private static void ConfigureElasticSearch(this WebApplicationBuilder webApplicationBuilder)
-		{
-			webApplicationBuilder.Services.Configure<ElasticSettings>(webApplicationBuilder.Configuration.GetSection(nameof(ElasticSettings)));
-
-			webApplicationBuilder.Services.AddSingleton<IElasticSettings>(serviceProvider =>
-				serviceProvider.GetRequiredService<IOptions<ElasticSettings>>().Value);
-
-			webApplicationBuilder.Services.AddSingleton(typeof(IElasticService<>), typeof(ElasticService<>));
-			webApplicationBuilder.Services.AddSingleton<IElasticGameService, ElasticGameService>();
-			webApplicationBuilder.Services.AddSingleton<IElasticPurchasedGameService, ElasticPurchasedGameService>();
 		}
 	}
 }
