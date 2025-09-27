@@ -1,6 +1,9 @@
 ﻿using Elastic.Clients.Elasticsearch;
 using Fcg.Game.Application.Elastic;
 using Microsoft.Extensions.Logging;
+#if RELEASE
+using Elastic.Transport;
+#endif
 
 namespace Fcg.Game.Infrastructure.Elastic
 {
