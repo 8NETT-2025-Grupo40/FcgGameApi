@@ -9,6 +9,8 @@ builder.RegisterServices();
 builder.ConfigureElasticSearch();
 builder.AddDbContextConfiguration();
 builder.ConfigureHealthChecks();
+builder.ConfigureOpenTelemetry();
+builder.ConfigureSerilog();
 
 var app = builder.Build();
 
