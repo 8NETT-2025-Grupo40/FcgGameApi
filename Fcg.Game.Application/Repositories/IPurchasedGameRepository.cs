@@ -6,5 +6,6 @@ namespace Fcg.Game.Application.Repositories
 	{
 		ValueTask InsertMany(List<PurchasedGameModel> purchasedGameModel);
 		ValueTask<List<PurchasedGameModel>> SelectByUserId(Guid guid);
+		ValueTask<List<Guid>> SelectGameIdentifiersByUserId(Guid guid);
 	}
 }

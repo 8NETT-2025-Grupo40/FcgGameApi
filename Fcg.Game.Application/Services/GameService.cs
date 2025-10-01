@@ -1,5 +1,4 @@
-﻿using Elastic.Clients.Elasticsearch.Cluster;
-using Fcg.Game.Application.Elastic;
+﻿using Fcg.Game.Application.Elastic;
 using Fcg.Game.Application.Entities;
 using Fcg.Game.Application.Entities.Requests;
 using Fcg.Game.Application.Repositories;
@@ -8,7 +7,6 @@ using Fcg.Game.Domain.Entities;
 using Fcg.Game.Domain.Entities.Elastic;
 using Fcg.Game.Domain.Enums;
 using Fcg.Game.Domain.ValueObjects;
-using System.Net;
 
 namespace Fcg.Game.Application.Services;
 
@@ -69,21 +67,40 @@ public class GameService(
 	{
 		try
 		{
-			var userId = grantGameRequest.UserId;
+			var userIdStr = grantGameRequest.UserId;
 			var purchases = grantGameRequest.PurchasedGames;
 
-			var purchasedGames = new List<PurchasedGameModel>(purchases.Count);
-			var elasticPurchasedGames = new List<ElasticPurchasedGameModel>(purchases.Count);
+			if (!Guid.TryParse(userIdStr, out Guid userId))
+			{
+				return OperationResult<IEnumerable<PurchasedGameModel>>.CreateErrorResponse("Invalid user identifier");
+			}
+
+			var currentPurchases = await purchasedGameRepository.SelectGameIdentifiersByUserId(userId);
+
+			var purchasedGames = new List<PurchasedGameModel>();
+			var elasticPurchasedGames = new List<ElasticPurchasedGameModel>();
 
 			foreach (var purchased in grantGameRequest.PurchasedGames)
 			{
-				purchasedGames.Add(PurchasedGameModel.Create(userId, purchased.GameId));
-				elasticPurchasedGames.Add(new ElasticPurchasedGameModel { GameIdentifier = purchased.GameId, UserIdentifier = userId });
+				if (Guid.TryParse(purchased.GameId, out var gameId) && currentPurchases.Any(c => c.Equals(gameId)))
+				{
+					continue;
+				}
+
+				purchasedGames.Add(PurchasedGameModel.Create(userIdStr, purchased.GameId));
+				elasticPurchasedGames.Add(new ElasticPurchasedGameModel { GameIdentifier = purchased.GameId, UserIdentifier = userIdStr });
 			}
 
-			await purchasedGameRepository.InsertMany(purchasedGames);
+			if (purchasedGames.Count > 0)
+			{
+				await purchasedGameRepository.InsertMany(purchasedGames);
+			}
 
-			await elasticPurchasedGameService.CreateManyDocumentsAsync(elasticPurchasedGames);
+			if (elasticPurchasedGames.Count > 0)
+			{
+				await elasticPurchasedGameService.CreateManyDocumentsAsync(elasticPurchasedGames);
+
+			}
 
 			return OperationResult.CreateSuccessfulResponse();
 		}
