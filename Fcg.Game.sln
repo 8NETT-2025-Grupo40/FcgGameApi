@@ -6,6 +6,10 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fcg.Game.Api", "Fcg.Game.Api\Fcg.Game.Api.csproj", "{1E9C671B-C0EF-4FA9-A0C6-571C0404145A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		Dockerfile = Dockerfile
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{9F034FF6-B1E3-460C-8667-9ED40FA585BC}"
 EndProject
@@ -31,6 +35,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Git", "Git", "{BFB7DBC1-251E-439E-BE72-67B44E10685A}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		.github\ecs\ecs-game-task-definition.json = .github\ecs\ecs-game-task-definition.json
 		.github\workflows\fcg-game.yml = .github\workflows\fcg-game.yml
 	EndProjectSection
 EndProject
