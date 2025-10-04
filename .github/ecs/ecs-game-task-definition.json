@@ -19,6 +19,18 @@
         {
           "name": "ConnectionStrings__DefaultConnection",
           "valueFrom": "arn:aws:secretsmanager:us-east-1:478511033947:secret:fcg-api-game-connection-string-BbpGA3"
+        },
+        {
+          "name": "ElasticSettings__Address",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:478511033947:secret:fcg-api-game-elastic-address-AFVqR1"
+        },
+        {
+          "name": "ElasticSettings__CloudId",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:478511033947:secret:fcg-api-game-elastic-key-QmNwx8"
+        },
+        {
+          "name": "ElasticSettings__Key",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:478511033947:secret:fcg-api-game-elastic-cloud-id-ndleJK"
         }
       ],
       "environment": [],
