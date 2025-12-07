@@ -13,7 +13,7 @@ env:
     AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
     EKS_CLUSTER: fcg
     K8S_NAMESPACE: fcg
-    HELM_RELEASE_NAME: game-api
+    HELM_RELEASE_NAME: fcg-game-api
 
 jobs:
     build:
@@ -248,7 +248,7 @@ jobs:
             echo "Waiting for External Secrets to sync..."
             
             kubectl wait --for=condition=Ready \
-              externalsecret/${{ env.HELM_RELEASE_NAME }}-fcg-game-api-externalsecret \
+              externalsecret/${{ env.HELM_RELEASE_NAME }}-externalsecret \
               -n ${{ env.K8S_NAMESPACE }} \
               --timeout=120s
             
@@ -263,7 +263,7 @@ jobs:
           run: |
             echo "Verifying deployment rollout..."
             
-            DEPLOYMENT_NAME="${{ env.HELM_RELEASE_NAME }}-fcg-game-api"
+            DEPLOYMENT_NAME="${{ env.HELM_RELEASE_NAME }}"
             
             kubectl rollout status deployment/$DEPLOYMENT_NAME -n ${{ env.K8S_NAMESPACE }} --timeout=10m
             
