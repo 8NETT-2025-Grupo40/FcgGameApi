@@ -228,7 +228,7 @@ jobs:
         # - ExternalSecret: sincroniza secrets do AWS Secrets Manager
         - name: Deploy to EKS with Helm
           env:
-            IMAGE_TAG: ${{ github.sha }}
+            IMAGE_TAG: latest
           run: |
             echo "Deploying FCG User API to EKS..."
             
