@@ -3,7 +3,7 @@
 {{- end }}
 
 {{- define "fcg-game-api.fullname" -}}
-fcg-user-api
+fcg-game-api
 {{- end }}
 
 {{- define "fcg-user-api.fullname" -}}
