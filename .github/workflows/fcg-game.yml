@@ -148,7 +148,7 @@ jobs:
       needs: [push-ecr, migration]
       if: github.event_name == 'pull_request'
       runs-on: ubuntu-latest
-      environment: production
+      #environment: production
       
       steps:
         - name: Checkout code
