@@ -3,11 +3,7 @@
 {{- end }}
 
 {{- define "fcg-game-api.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name (include "fcg-game-api.name" .) | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
+fcg-user-api
 {{- end }}
 
 {{- define "fcg-user-api.fullname" -}}
