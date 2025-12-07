@@ -5,14 +5,15 @@ on:
     branches: [ 'main' ]
   pull_request:
     types: [opened, synchronize]
+  workflow_dispatch:
 
 env:
     AWS_REGION: us-east-1
     ECR_REPOSITORY: fcg-game-api
-    ECS_SERVICE: FCG-TSK-GAME-ECS-service-hcq7es02
-    ECS_CLUSTER: FCG-Cluster
-    ECS_TASK_DEFINITION: .github/ecs/ecs-game-task-definition.json
-    CONTAINER_NAME: fcg-game-api
+    AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+    EKS_CLUSTER: fcg
+    K8S_NAMESPACE: fcg
+    HELM_RELEASE_NAME: game-api
 
 jobs:
     build:
@@ -110,7 +111,7 @@ jobs:
                 --project Fcg.Payment.Api/Fcg.Payment.API.csproj \
                 --connection "$ConnectionStrings__DefaultConnection"
             
-    deploy:
+    push-ecr:
         name: Deploy docker image on Elastic Container Registry
         needs: [build,unit-tests,migration]
         environment: production
@@ -141,19 +142,155 @@ jobs:
               docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
               docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
               echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+    
+    deploy-eks:
+      name: Deploy to EKS
+      needs: [push-ecr, migration]
+      if: github.event_name == 'push'
+      runs-on: ubuntu-latest
+      environment: production
+      
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
         
-        - name: Fill the image ID in the ECS task definition
-          id: task-def
-          uses: aws-actions/amazon-ecs-render-task-definition@c804dfbdd57f713b6c079302a4c01db7017a36fc
+        - name: Configure AWS Credentials
+          uses: aws-actions/configure-aws-credentials@v4
           with:
-            task-definition: ${{ env.ECS_TASK_DEFINITION }}
-            container-name: ${{ env.CONTAINER_NAME }}
-            image: ${{ steps.build-image.outputs.image }}
-
-        - name: Deploy ECS Task Definition
-          uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
-          with:
-            task-definition: ${{ steps.task-def.outputs.task-definition }}
-            service: ${{ env.ECS_SERVICE }}
-            cluster: ${{ env.ECS_CLUSTER }}
-            wait-for-service-stability: true
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ env.AWS_REGION }}
+        
+        # Configura kubectl para se conectar ao cluster EKS
+        # Isso cria/atualiza o arquivo ~/.kube/config com as credenciais do cluster
+        - name: Update kubeconfig
+          run: |
+            aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER }}
+            kubectl cluster-info
+        
+        # Instala eksctl - ferramenta CLI para gerenciar clusters EKS
+        # Usado para criar IRSA (IAM Roles for Service Accounts)
+        - name: Install eksctl
+          run: |
+            curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz"
+            tar -xzf eksctl_Linux_amd64.tar.gz -C /tmp
+            sudo mv /tmp/eksctl /usr/local/bin
+            eksctl version
+        
+        # IRSA (IAM Roles for Service Accounts) permite que pods no Kubernetes
+        # assumam roles IAM da AWS sem usar credenciais estáticas.
+        # Isso é necessário para o External Secrets Operator acessar o AWS Secrets Manager.
+        # 
+        # Como funciona:
+        # 1. Cria um ServiceAccount no Kubernetes (fcg-user-api-sa)
+        # 2. Cria uma IAM Role vinculada ao ServiceAccount via OIDC
+        # 3. Anexa a policy FCGExternalSecretsPolicy à role
+        # 4. Pods que usam esse ServiceAccount podem acessar Secrets Manager
+        - name: Create/Update IRSA for External Secrets
+          run: |
+            echo "Checking if IRSA already exists..."
+            if kubectl get serviceaccount fcg-game-api-sa -n ${{ env.K8S_NAMESPACE }} &>/dev/null; then
+              echo "ServiceAccount already exists, skipping IRSA creation"
+              IRSA_EXISTS=true
+            else
+              echo "Creating IRSA for fcg-game-api-sa..."
+              eksctl create iamserviceaccount \
+                --cluster=${{ env.EKS_CLUSTER }} \
+                --namespace=${{ env.K8S_NAMESPACE }} \
+                --name=fcg-game-api-sa \
+                --attach-policy-arn=arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:policy/FCGExternalSecretsPolicy \
+                --approve \
+                --region=${{ env.AWS_REGION }}
+              
+              echo "IRSA created successfully"
+              echo "Waiting 30s for IAM propagation..."
+              sleep 30
+              IRSA_EXISTS=false
+            fi
+        
+        # Helm é o gerenciador de pacotes do Kubernetes
+        # Permite deployar aplicações usando templates (charts)
+        - name: Install Helm
+          run: |
+            curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+            helm version
+        
+        # Deploy da aplicação no EKS usando Helm
+        # O comando "upgrade --install" faz:
+        # - Se o release não existe: instala (primeira vez)
+        # - Se já existe: atualiza (deploys subsequentes)
+        # 
+        # O chart em ./k8s/ contém:
+        # - Deployment: define os pods da aplicação
+        # - Service: expõe os pods internamente
+        # - Ingress: cria ALB para acesso externo
+        # - HPA: autoscaling baseado em CPU/memória
+        # - ExternalSecret: sincroniza secrets do AWS Secrets Manager
+        - name: Deploy to EKS with Helm
+          env:
+            IMAGE_TAG: ${{ github.sha }}
+          run: |
+            echo "Deploying FCG User API to EKS..."
+            
+            helm upgrade --install ${{ env.HELM_RELEASE_NAME }} ./k8s \
+              --namespace ${{ env.K8S_NAMESPACE }} \
+              --create-namespace \
+              --set image.tag=$IMAGE_TAG \
+              --timeout 10m
+            
+            echo "Helm deployment completed"
+        
+        # External Secrets Operator sincroniza secrets do AWS Secrets Manager
+        # para Kubernetes Secrets. Aguardamos a sincronização antes de verificar
+        # os pods, pois eles dependem desses secrets (connection string, JWT config, etc)
+        - name: Wait for External Secrets sync
+          run: |
+            echo "Waiting for External Secrets to sync..."
+            
+            kubectl wait --for=condition=Ready \
+              externalsecret/${{ env.HELM_RELEASE_NAME }}-fcg-game-api-externalsecret \
+              -n ${{ env.K8S_NAMESPACE }} \
+              --timeout=120s
+            
+            echo "External Secrets synced successfully"
+        
+        # Verifica se o deployment foi concluído com sucesso
+        # "kubectl rollout status" aguarda até que:
+        # - Todos os pods novos estejam Running
+        # - Todos os pods antigos sejam terminados
+        # - Health checks (readiness/liveness) passem
+        - name: Verify Deployment
+          run: |
+            echo "Verifying deployment rollout..."
+            
+            DEPLOYMENT_NAME="${{ env.HELM_RELEASE_NAME }}-fcg-game-api"
+            
+            kubectl rollout status deployment/$DEPLOYMENT_NAME -n ${{ env.K8S_NAMESPACE }} --timeout=10m
+            
+            echo ""
+            echo "Deployment completed successfully"
+            kubectl get pods -n ${{ env.K8S_NAMESPACE }} -l app.kubernetes.io/name=fcg-game-api
+        
+        # Obtém a URL do ALB (Application Load Balancer)
+        # O AWS Load Balancer Controller cria automaticamente um ALB quando
+        # o Ingress é criado. O ALB distribui tráfego entre os pods da aplicação.
+        # 
+        # Nota: O ALB pode levar 2-3 minutos para ser provisionado na primeira vez.
+        # Em deploys subsequentes, o mesmo ALB é reutilizado (via annotation group.name).
+        - name: Get ALB URL
+          run: |
+            INGRESS_NAME="${{ env.HELM_RELEASE_NAME }}-fcg-game-api"
+            ALB_URL=$(kubectl get ingress -n ${{ env.K8S_NAMESPACE }} $INGRESS_NAME -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
+            
+            if [ -z "$ALB_URL" ]; then
+              echo "ALB is being provisioned. Check status:"
+              echo "kubectl get ingress -n ${{ env.K8S_NAMESPACE }}"
+            else
+              echo ""
+              echo "=========================================="
+              echo "DEPLOYMENT SUCCESSFUL"
+              echo "=========================================="
+              echo "API URL: http://$ALB_URL"
+              echo "Health Check: http://$ALB_URL/health"
+              echo "=========================================="
+            fi

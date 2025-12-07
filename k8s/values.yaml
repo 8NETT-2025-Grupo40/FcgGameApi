@@ -104,3 +104,5 @@ serviceAccount:
   create: false  # false porque o eksctl cria durante o deploy (workflow)
   name: "fcg-game-api-sa"  # deve corresponder ao nome usado no workflow
   annotations: {}  # eksctl injeta automaticamente eks.amazonaws.com/role-arn
+
+fullnameOverride: fcg-game-api

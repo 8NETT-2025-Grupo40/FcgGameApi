@@ -10,6 +10,10 @@
 {{- end -}}
 {{- end }}
 
+{{- define "fcg-user-api.fullname" -}}
+fcg-user-api
+{{- end }}
+
 {{- define "fcg-game-api.labels" -}}
 helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 app.kubernetes.io/name: {{ include "fcg-game-api.name" . }}
