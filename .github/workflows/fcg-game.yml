@@ -145,10 +145,10 @@ jobs:
     
     deploy-eks:
       name: Deploy to EKS
-      #needs: [push-ecr, migration]
-      if: github.event_name == 'pull_request'
+      needs: [push-ecr, migration]
+      if: github.event_name == 'push'
       runs-on: ubuntu-latest
-      #environment: production
+      environment: production
       
       steps:
         - name: Checkout code
