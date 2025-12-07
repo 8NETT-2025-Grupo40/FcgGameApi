@@ -39,6 +39,8 @@ ingress:
       pathType: Prefix
     - path: /health
       pathType: Prefix
+    - path: /games
+      pathType: Prefix
   annotations:
     # scheme: internet-facing = ALB público (acessível pela internet)
     alb.ingress.kubernetes.io/scheme: internet-facing
