@@ -108,7 +108,7 @@ jobs:
             run: |
               dotnet ef database update \
                 --configuration Release \
-                --project Fcg.Payment.Api/Fcg.Payment.API.csproj \
+                --project Fcg.Game.Api/Fcg.Game.Api.csproj \
                 --connection "$ConnectionStrings__DefaultConnection"
             
     push-ecr:
