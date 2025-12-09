@@ -182,7 +182,7 @@ jobs:
         # Isso é necessário para o External Secrets Operator acessar o AWS Secrets Manager.
         # 
         # Como funciona:
-        # 1. Cria um ServiceAccount no Kubernetes (fcg-user-api-sa)
+        # 1. Cria um ServiceAccount no Kubernetes (fcg-game-api-sa)
         # 2. Cria uma IAM Role vinculada ao ServiceAccount via OIDC
         # 3. Anexa a policy FCGExternalSecretsPolicy à role
         # 4. Pods que usam esse ServiceAccount podem acessar Secrets Manager
@@ -230,7 +230,7 @@ jobs:
           env:
             IMAGE_TAG: latest
           run: |
-            echo "Deploying FCG User API to EKS..."
+            echo "Deploying FCG Game API to EKS..."
             
             helm upgrade --install ${{ env.HELM_RELEASE_NAME }} ./k8s \
               --namespace ${{ env.K8S_NAMESPACE }} \
