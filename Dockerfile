@@ -1,5 +1,5 @@
 # Stage 1 - Build and publish
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 ARG BUILD_CONFIGURATION=Release
 
 WORKDIR /src
@@ -22,7 +22,7 @@ RUN dotnet publish "Fcg.Game.Api.csproj" \
 
 
 # Stage 2 - Start api
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
 USER app
 WORKDIR /app
 
