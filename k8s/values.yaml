@@ -33,12 +33,12 @@ ingress:
   className: alb  # usa o AWS Load Balancer Controller
   host: ""  # deixe vazio para aceitar qualquer hostname
   paths:
-    - path: /users
-      pathType: Prefix
-    - path: /auth
-      pathType: Prefix
-    - path: /health
-      pathType: Prefix
+#    - path: /users
+#      pathType: Prefix
+#    - path: /auth
+#      pathType: Prefix
+#    - path: /health
+#      pathType: Prefix
     - path: /games
       pathType: Prefix
   annotations:
