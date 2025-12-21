@@ -23,6 +23,10 @@ RUN dotnet publish "Fcg.Game.Api.csproj" \
 
 # Stage 2 - Start api
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
+
+RUN apk add --no-cache icu-libs
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
 USER app
 WORKDIR /app
 
