@@ -53,6 +53,16 @@ spec:
                 secretKeyRef:
                   name: {{ include "fcg-game-api.fullname" . }}-secrets
                   key: jwt-key
+            - name: ElasticSettings__CloudId
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "fcg-game-api.fullname" . }}-secrets
+                  key: elastic-search-cloud-id
+            - name: ElasticSettings__ApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "fcg-game-api.fullname" . }}-secrets
+                  key: elastic-search-api-key
           # Readiness probe: Kubernetes espera passar antes de enviar tráfego
           # Se falhar, pod é removido do Service (não recebe requisições)
           # Readiness probe: Kubernetes espera passar antes de enviar tráfego
